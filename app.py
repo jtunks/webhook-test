@@ -94,7 +94,7 @@ def process_webhook():
 
     post_data = request.get_json(force=True)
 
-    m = json.dumps({'roomId': SPARK_ROOM_ID, 'text': post_data})
+    m = json.dumps({'roomId': SPARK_ROOM_ID, 'text': 'Received Message into bot'})
     print('Spark Request: ' + SPARK_MESSAGES + m)
     r = requests.post(SPARK_MESSAGES, data=m, headers=SPARK_HEADERS, verify=False)
     print('Spark Response: ' + r.text)
