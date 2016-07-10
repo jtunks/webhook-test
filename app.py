@@ -1,14 +1,3 @@
-#from flask import Flask
-
-#app = Flask(__name__)
-
-#@app.route("/")
-#def hello():
-#    return "Hello World!!"
-
-
-#if __name__ == "__main__":
-#    app.run(debug=True,host='0.0.0.0')
 
 # ############################################################################
 # IMPORTS BELOW
@@ -101,20 +90,24 @@ app_headers["Content-type"] = "application/json"
 
 @app.route('/', methods=["POST"])
 def process_webhook():
-    # Verify that the request is propery authorized
-    # authz = valid_request_check(request)
-    # if not authz[0]:
-    #     return authz[1]
+
 
     post_data = request.get_json(force=True)
+
+    m = json.dumps({'roomId': SPARK_ROOM_ID, 'text': post_data})
+    print('Spark Request: ' + SPARK_MESSAGES + m)
+    r = requests.post(SPARK_MESSAGES, data=m, headers=SPARK_HEADERS, verify=False)
+    print('Spark Response: ' + r.text)
+
+
     pprint(post_data)
 
     # Check what room this came from
     # If Demo Room process for open room
-
-    print("Incoming Spark Room Message.")
-    sys.stderr.write("Incoming Spark Room Message\n")
-    process_room_message(post_data)
+    if post_data["data"]["roomId"] == SPARK_ROOM_ID:
+        print("Incoming Spark Room Message.")
+        sys.stderr.write("Incoming Spark Room Message\n")
+        process_room_message(post_data)
         # message_id = post_data["data"]["id"]
         # message = get_message(message_id)
         # pprint(message)
@@ -140,57 +133,17 @@ def process_webhook():
         #             '''To place a vote, say "I'd like to vote" to start a private voting session.'''
         #     send_message_to_room(demo_room_id, reply)
     # If not the demo room, assume its a user voting session
-    
+    else:
+        # print("Incoming Individual Message.")
+        sys.stderr.write("Incoming Individual Message\n")
+        process_incoming_message(post_data)
+
     return ""
-
-# Bot functions to process the incoming messages posted by Cisco Spark
-def process_room_message(post_data):
-    message_id = post_data["data"]["id"]
-    message = get_message(message_id)
-    # pprint(message)
-
-    # First make sure not processing a message from the bot
-    if message["personEmail"] == bot_email:
-        return ""
 
 @app.route('/health')
 def health_check():
     return "400"
 
-
-
-    # Check if message contains word "results" and if so send results
-    if message["text"].lower().find("/email") > -1:
-        results = get_results()
-        reply = "Received email message\n"
-     #   for result in results:
-     #       reply += "  - %s has %s votes.\n" % (result[0], result[1])
-    # Check if message contains word "options" and if so send options
-    elif message["text"].lower().find("/sms") > -1:
-        options = get_options()
-        reply = "Received SMS message\n"
-     #   for option in options:
-     #       reply += "  - %s \n" % (option)
-    # Check if message contains word "vote" and if so start a voting session
-    elif message["text"].lower().find("/voice") > -1:
-        reply = "Received Voice Message\n"
-    #    start_vote_session(message["personEmail"])
-    # Check if message contains phrase "add email" and if so add user to room
-    elif message["text"].lower().find("/off") > -1:
-        # Get the email that comes
-     #   emails = re.findall(r'[\w\.-]+@[\w\.-]+', message["text"])
-        # pprint(emails)
-        reply = "Turning off Message\n"
-     #   for email in emails:
-     #       add_email_demo_room(email, demo_room_id)
-     #       reply += "  - %s \n" % (email)
-    # If nothing matches, send instructions
-    else:
-        # Reply back to message
-        reply = "This is a different message\n" \
-                "Will deal with it later\n"
-
-    send_message_to_room(demo_room_id, reply)
 
 
 app.run(debug=True, host='0.0.0.0', port=int("5000"))
