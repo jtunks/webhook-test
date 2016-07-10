@@ -111,10 +111,10 @@ def process_webhook():
 
     # Check what room this came from
     # If Demo Room process for open room
-    if post_data["data"]["roomId"] == SPARK_ROOM_ID:
-        print("Incoming Spark Room Message.")
-        sys.stderr.write("Incoming Spark Room Message\n")
-        process_room_message(post_data)
+
+    print("Incoming Spark Room Message.")
+    sys.stderr.write("Incoming Spark Room Message\n")
+    process_room_message(post_data)
         # message_id = post_data["data"]["id"]
         # message = get_message(message_id)
         # pprint(message)
@@ -140,11 +140,7 @@ def process_webhook():
         #             '''To place a vote, say "I'd like to vote" to start a private voting session.'''
         #     send_message_to_room(demo_room_id, reply)
     # If not the demo room, assume its a user voting session
-    else:
-        # print("Incoming Individual Message.")
-        sys.stderr.write("Incoming Individual Message\n")
-        process_incoming_message(post_data)
-
+    
     return ""
 
 # Bot functions to process the incoming messages posted by Cisco Spark
