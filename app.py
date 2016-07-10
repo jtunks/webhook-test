@@ -157,7 +157,7 @@ def process_room_message(post_data):
     if message["personEmail"] == bot_email:
         return ""
 
-@app.route('/health', methods=["POST"])
+@app.route('/health', methods=["GET"])
 def process_webhook():
     # Verify that the request is propery authorized
     # authz = valid_request_check(request)
